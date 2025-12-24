@@ -1,0 +1,206 @@
+{
+  "api_endpoints": [
+    {
+      "route": "/v1/displays/generate-code",
+      "method": "GET",
+      "description": "Generates a unique 6-digit code for a new device to initiate pairing.",
+      "input_params": {
+        "type": "None",
+        "details": "No request parameters or body required."
+      },
+      "output_response": {
+        "status": "200 OK",
+        "body_example": {
+          "pairing_code": "123456"
+        }
+      },
+      "access": "Public (Device)"
+    },
+    {
+      "route": "/v1/displays/pair",
+      "method": "POST",
+      "description": "Pairs the physical device using the generated code.",
+      "input_params": {
+        "type": "Body (JSON)",
+        "details": {
+          "pairing_code": "string (The 6-digit code to pair with.)"
+        }
+      },
+      "output_response": {
+        "status": "200 OK",
+        "body_example": {
+          "device_token": "uuid-v4-token",
+          "user_id": "user123"
+        },
+        "notes": "Returns 202 Accepted if the code is valid but not yet claimed by a user."
+      },
+      "access": "Public (Device)"
+    },
+    {
+      "route": "/v1/player/config",
+      "method": "GET",
+      "description": "Retrieves the active playlist configuration for a specific device.",
+      "input_params": {
+        "type": "Query Parameter",
+        "details": {
+          "device_token": "string (The permanent device token.)"
+        }
+      },
+      "output_response": {
+        "status": "200 OK",
+        "body_example": {
+          "playlist_json": {
+            "playlist_id": "uuid-playlist-id",
+            "display_sequence": [
+              {
+                "asset_id": "uuid-asset-id",
+                "file_url": "https://cloudinary.com/...",
+                "type": "image|video",
+                "playback_duration": 10
+              }
+            ],
+            "last_updated": "2025-12-16T..."
+          }
+        },
+        "notes": "Returns an empty display_sequence if no playlist is assigned."
+      },
+      "access": "Public (Device)"
+    },
+    {
+      "route": "/v1/player/heartbeat",
+      "method": "POST",
+      "description": "Sends a status update from the device to keep the record fresh.",
+      "input_params": {
+        "type": "Body (JSON)",
+        "details": {
+          "device_token": "string (required)",
+          "status": "string (e.g., 'playing', 'idle', 'error')",
+          "app_version": "string (e.g., '1.0.0')",
+          "timestamp": "string (Optional, current time of device)"
+        }
+      },
+      "output_response": {
+        "status": "200 OK",
+        "body_example": {
+          "success": true
+        }
+      },
+      "access": "Public (Device)"
+    },
+    {
+      "route": "/v1/admin/claim-device",
+      "method": "POST",
+      "description": "Links a pending device (using its pairing code) to a specific user's account.",
+      "input_params": {
+        "type": "Body (JSON)",
+        "details": {
+          "pairing_code": "string (The 6-digit code)",
+          "user_id": "string (The ID of the user claiming the device)"
+        }
+      },
+      "output_response": {
+        "status": "200 OK",
+        "body_example": {
+          "message": "Device claimed successfully",
+          "device": {
+           
+          }
+        }
+      },
+      "access": "Private (Admin/User)"
+    },
+    {
+      "route": "/v1/admin/upload",
+      "method": "POST",
+      "description": "Uploads a media file to Cloudinary and returns the public URL and asset details.",
+      "input_params": {
+        "type": "Multipart/Form-Data",
+        "details": {
+          "media_file": "File (Image or Video)",
+          "user_id": "string (In form body)"
+        }
+      },
+      "output_response": {
+        "status": "200 OK",
+        "body_example": {
+          "file_url": "string (Cloudinary URL)",
+          "asset_id": "uuid-asset-id",
+          "type": "image|video",
+          "playback_duration": 10
+        }
+      },
+      "access": "Private (Admin/User)"
+    },
+    {
+      "route": "/v1/admin/playlist",
+      "method": "POST",
+      "description": "Creates a new playlist configuration.",
+      "input_params": {
+        "type": "Body (JSON)",
+        "details": {
+          "user_id": "string (Owner of the playlist)",
+          "name": "string (Playlist name)",
+          "assets": "array of MediaAsset objects (display_sequence)"
+        }
+      },
+      "output_response": {
+        "status": "201 Created",
+        "body_example": {
+          "playlist_id": "uuid-playlist-id",
+          "name": "New Playlist Name",
+          "display_sequence": [
+           
+          ]
+        }
+      },
+      "access": "Private (Admin/User)"
+    },
+    {
+      "route": "/v1/admin/assign-playlist",
+      "method": "POST",
+      "description": "Assigns an existing playlist to a specific device.",
+      "input_params": {
+        "type": "Body (JSON)",
+        "details": {
+          "device_token": "string (Target device)",
+          "playlist_id": "string (ID of the playlist to assign)"
+        }
+      },
+      "output_response": {
+        "status": "200 OK",
+        "body_example": {
+          "message": "Playlist assigned successfully",
+          "device": {
+            
+          }
+        }
+      },
+      "access": "Private (Admin/User)"
+    },
+    {
+      "route": "/v1/admin/sync-status",
+      "method": "GET",
+      "description": "Returns the download status of devices associated with a specific playlist.",
+      "input_params": {
+        "type": "Query Parameters",
+        "details": {
+          "user_id": "string (The owner of the playlist)",
+          "playlist_id": "string (The playlist being tracked)"
+        }
+      },
+      "output_response": {
+        "status": "200 OK",
+        "body_example": {
+          "devices": [
+            {
+              "device_token": "uuid-v4-token",
+              "download_status": "completed|in_progress|failed",
+              "last_heartbeat": "2025-12-16T..."
+            }
+          ]
+        }
+      },
+      "access": "Private (Admin/User)"
+    }
+  ]
+}

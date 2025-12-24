@@ -1,0 +1,7 @@
+https://restaurent-khaki.vercel.app/
+curl -X POST http://localhost:5000/v1/users/register -H "Content-Type: application/json" -d '{"email": "admin@example.com", "password": "securepassword123", "name":"admin"}'
+
+
+curl -X POST http://localhost:5000/v1/users/login   -H "Content-Type: application/json"  -d '{"email": "admin@example.com", "password": "securepassword123"}'
+
+curl -X GET http://localhost:5000/v1/displays/generate   -H "Content-Type: application/json"  
